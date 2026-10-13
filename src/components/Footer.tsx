@@ -12,10 +12,10 @@ const Footer: React.FC = () => {
           <div className="col-span-2 md:col-span-1 flex flex-col items-center md:items-start gap-3 sm:gap-4">
             <Link to="/" className="flex items-center gap-2">
               <img src={logo} alt="Velvet Store" className="h-10 w-10 sm:h-12 sm:w-12" />
-              <span className="font-display text-lg gradient-text">Velvet Store</span>
+              <span className="font-display text-lg gradient-text">Voltech chlef</span>
             </Link>
             <p className="font-footer text-sm sm:text-base text-muted-foreground text-center md:text-right leading-relaxed">
-              متجر Velvet Store - وجهتك الأولى للتسوق الأنيق والمنتجات الفاخرة
+              Voltech Chlef
             </p>
             {/* Social Icons */}
             <div className="flex gap-3 mt-2">
@@ -48,15 +48,7 @@ const Footer: React.FC = () => {
           </div>
 
           {/* Categories */}
-          <div className="text-center md:text-right">
-            <h3 className="font-footer text-base sm:text-lg mb-3 sm:mb-4 gradient-text">التصنيفات</h3>
-            <ul className="font-footer space-y-2 text-sm sm:text-base text-muted-foreground">
-              <li><a href="#" className="hover:text-primary transition-colors">إلكترونيات</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">أزياء</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">إكسسوارات</a></li>
-              <li><a href="#" className="hover:text-primary transition-colors">عطور</a></li>
-            </ul>
-          </div>
+          
 
           {/* Contact */}
           <div className="text-center md:text-right col-span-2 md:col-span-1">
@@ -72,7 +64,7 @@ const Footer: React.FC = () => {
               </li>
               <li className="flex items-center justify-center md:justify-start gap-2">
                 <MapPin className="h-4 w-4 text-primary flex-shrink-0" />
-                <span>الجزائر العاصمة</span>
+                <span> شلف سيتي شوبب</span>
               </li>
             </ul>
           </div>
@@ -82,7 +74,7 @@ const Footer: React.FC = () => {
         <div className="mt-8 pt-6 border-t border-border">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 text-center">
             <p className="font-footer text-sm text-muted-foreground">
-              © 2026 Velvet Store. جميع الحقوق محفوظة.
+              © 2026 Voltech Chlef . جميع الحقوق محفوظة.
             </p>
             <div className="flex gap-4 text-sm text-muted-foreground font-footer">
               <a href="#" className="hover:text-primary transition-colors">سياسة الخصوصية</a>
