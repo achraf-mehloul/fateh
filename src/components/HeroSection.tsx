@@ -29,7 +29,7 @@ const HeroSection: React.FC = () => {
         </div>
         
         <h1 className="font-display text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl mb-4 sm:mb-6 animate-slide-up leading-tight">
-          <span className="gradient-text">Velvet Store</span>
+          <span className="gradient-text">Voltech chlef</span>
         </h1>
         <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-muted-foreground mb-6 sm:mb-8 max-w-2xl mx-auto animate-fade-in">
           اكتشف تشكيلة واسعة من المنتجات الفاخرة بأسعار مناسبة
