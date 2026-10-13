@@ -1,3 +1,4 @@
+
 import React, { useState, useMemo, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -37,7 +38,6 @@ interface DBProduct {
   reviews_count: number | null;
 }
 
-// تحويل منتج قاعدة البيانات إلى الشكل المستخدم في الواجهة
 const mapDBProductToProduct = (dbProduct: DBProduct, categorySlug?: string) => ({
   id: dbProduct.id,
   name: dbProduct.name_ar || dbProduct.name,
@@ -61,47 +61,82 @@ const Index: React.FC = () => {
   const [dealsActive, setDealsActive] = useState(false);
 
   useEffect(() => {
-    fetchData();
+    void fetchData();
   }, []);
 
   const fetchData = async () => {
     setLoading(true);
+
     try {
-      // جلب التصنيفات والمنتجات وإعدادات العروض بشكل متوازي
       const [categoriesRes, productsRes, dealsRes] = await Promise.all([
-        supabase.from('categories').select('*').eq('is_active', true).order('sort_order'),
-        supabase.from('products').select('*').eq('is_active', true),
-        supabase.from('deals_settings').select('*').limit(1).maybeSingle(),
+        supabase
+          .from('categories')
+          .select('*')
+          .eq('is_active', true)
+          .order('sort_order'),
+        supabase
+          .from('products')
+          .select('*')
+          .eq('is_active', true),
+        supabase
+          .from('deals_settings')
+          .select('*')
+          .limit(1)
+          .maybeSingle(),
       ]);
 
-      if (categoriesRes.data) setCategories(categoriesRes.data);
-      if (productsRes.data) setProducts(productsRes.data);
-      if (dealsRes.data) setDealsActive(dealsRes.data.is_active);
+      if (categoriesRes.error) {
+        console.error('Error fetching categories:', categoriesRes.error);
+      } else {
+        setCategories(categoriesRes.data || []);
+      }
+
+      if (productsRes.error) {
+        console.error('Error fetching products:', productsRes.error);
+      } else {
+        setProducts(productsRes.data || []);
+      }
+
+      if (dealsRes.error) {
+        console.error('Error fetching deals settings:', dealsRes.error);
+      } else {
+        setDealsActive(dealsRes.data?.is_active ?? false);
+      }
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching homepage data:', error);
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const categoryMap = useMemo(() => {
     const map: Record<string, DBCategory> = {};
-    categories.forEach(cat => {
-      map[cat.id] = cat;
+
+    categories.forEach((category) => {
+      map[category.id] = category;
     });
+
     return map;
   }, [categories]);
 
   const filteredProducts = useMemo(() => {
-    if (!searchQuery.trim()) return null;
+    const query = searchQuery.trim().toLocaleLowerCase();
+
+    if (!query) return null;
+
     return products.filter((product) => {
       const productName = product.name_ar || product.name;
-      const productDesc = product.description_ar || product.description || '';
-      const categoryName = product.category_id ? (categoryMap[product.category_id]?.name_ar || '') : '';
-      
+      const productDescription =
+        product.description_ar || product.description || '';
+      const categoryName = product.category_id
+        ? categoryMap[product.category_id]?.name_ar || ''
+        : '';
+
       return (
-        productName.includes(searchQuery) ||
-        productDesc.includes(searchQuery) ||
-        categoryName.includes(searchQuery)
+        productName.toLocaleLowerCase().includes(query) ||
+        product.name.toLocaleLowerCase().includes(query) ||
+        productDescription.toLocaleLowerCase().includes(query) ||
+        categoryName.toLocaleLowerCase().includes(query)
       );
     });
   }, [searchQuery, products, categoryMap]);
@@ -110,8 +145,15 @@ const Index: React.FC = () => {
     return products.filter((product) => product.category_id === categoryId);
   };
 
+  const uncategorizedProducts = useMemo(() => {
+    return products.filter(
+      (product) =>
+        !product.category_id || !categoryMap[product.category_id]
+    );
+  }, [products, categoryMap]);
+
   const dealProducts = useMemo(() => {
-    return products.filter(p => p.is_deal);
+    return products.filter((product) => product.is_deal);
   }, [products]);
 
   if (loading) {
@@ -122,8 +164,8 @@ const Index: React.FC = () => {
           <HeroSection />
           <div className="container py-8">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-              {[...Array(10)].map((_, i) => (
-                <div key={i} className="space-y-3">
+              {[...Array(10)].map((_, index) => (
+                <div key={index} className="space-y-3">
                   <Skeleton className="h-48 w-full rounded-xl" />
                   <Skeleton className="h-4 w-3/4" />
                   <Skeleton className="h-4 w-1/2" />
@@ -140,61 +182,92 @@ const Index: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header onSearch={setSearchQuery} />
-      
+
       <main className="flex-1">
         <HeroSection />
-        
-        {/* Deals Section with Countdown */}
+
         {dealsActive && dealProducts.length > 0 && (
-          <DealsSection 
-            products={dealProducts.map(p => mapDBProductToProduct(p, categoryMap[p.category_id || '']?.slug))} 
+          <DealsSection
+            products={dealProducts.map((product) =>
+              mapDBProductToProduct(
+                product,
+                categoryMap[product.category_id || '']?.slug
+              )
+            )}
           />
         )}
-        
+
         <div id="products">
-          {/* Search Results */}
           {filteredProducts !== null ? (
-            <section className="py-8 container">
+            <section className="container py-8">
               <h2 className="font-display text-2xl mb-6 gradient-text">
                 نتائج البحث: "{searchQuery}"
               </h2>
+
               {filteredProducts.length > 0 ? (
                 <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
                   {filteredProducts.map((product) => (
-                    <ProductCard 
-                      key={product.id} 
-                      product={mapDBProductToProduct(product, categoryMap[product.category_id || '']?.slug)} 
+                    <ProductCard
+                      key={product.id}
+                      product={mapDBProductToProduct(
+                        product,
+                        categoryMap[product.category_id || '']?.slug
+                      )}
                     />
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">لم يتم العثور على منتجات</p>
+                  <p className="text-muted-foreground">
+                    لم يتم العثور على منتجات
+                  </p>
                 </div>
               )}
             </section>
           ) : (
-            /* Category Sections */
-            categories.map((category) => {
-              const categoryProducts = getProductsByCategory(category.id);
-              if (categoryProducts.length === 0) return null;
-              
-              return (
-                <CategorySection
-                  key={category.id}
-                  category={{
-                    id: category.slug,
-                    name: category.name_ar,
-                    image: categoryProducts[0]?.image_url || '/placeholder.svg',
-                  }}
-                  products={categoryProducts.map(p => mapDBProductToProduct(p, category.slug))}
-                />
-              );
-            })
+            <>
+              {uncategorizedProducts.length > 0 && (
+                <section className="container py-8">
+                  <h2 className="font-display text-2xl mb-6 gradient-text">
+                    جميع المنتجات
+                  </h2>
+
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                    {uncategorizedProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={mapDBProductToProduct(product)}
+                      />
+                    ))}
+                  </div>
+                </section>
+              )}
+
+              {categories.map((category) => {
+                const categoryProducts = getProductsByCategory(category.id);
+
+                if (categoryProducts.length === 0) return null;
+
+                return (
+                  <CategorySection
+                    key={category.id}
+                    category={{
+                      id: category.slug,
+                      name: category.name_ar || category.name,
+                      image:
+                        categoryProducts[0]?.image_url || '/placeholder.svg',
+                    }}
+                    products={categoryProducts.map((product) =>
+                      mapDBProductToProduct(product, category.slug)
+                    )}
+                  />
+                );
+              })}
+            </>
           )}
         </div>
       </main>
-      
+
       <Footer />
     </div>
   );
