@@ -1,27 +1,26 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    --background: 220 55% 7%;
-    --foreground: 210 40% 96%;
+    --background: 0 0% 100%;
+    --foreground: 220 55% 7%;
 
-    --card: 219 43% 11%;
-    --card-foreground: 210 40% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 55% 7%;
 
-    --popover: 219 43% 11%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 55% 7%;
 
-    --primary: 195 97% 50%;
-    --primary-foreground: 220 55% 7%;
+    --primary: 195 97% 40%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 216 80% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 218 32% 16%;
-    --muted-foreground: 215 20% 70%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 40%;
 
     --accent: 37 100% 59%;
     --accent-foreground: 220 55% 7%;
@@ -29,21 +28,21 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 30% 22%;
-    --input: 215 30% 22%;
-    --ring: 195 97% 50%;
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 195 97% 40%;
 
     --radius: 0.75rem;
 
     --gradient-velvet: linear-gradient(
       135deg,
-      hsl(195 97% 50%) 0%,
+      hsl(195 97% 40%) 0%,
       hsl(216 80% 45%) 100%
     );
 
     --gradient-velvet-hover: linear-gradient(
       135deg,
-      hsl(195 97% 58%) 0%,
+      hsl(195 97% 48%) 0%,
       hsl(216 80% 52%) 100%
     );
 
@@ -51,34 +50,34 @@
     --font-footer: system-ui, sans-serif;
     --font-body: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-    --sidebar-background: 220 55% 7%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 195 97% 50%;
-    --sidebar-primary-foreground: 220 55% 7%;
-    --sidebar-accent: 218 32% 16%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 215 30% 22%;
-    --sidebar-ring: 195 97% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 55% 7%;
+    --sidebar-primary: 195 97% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 220 55% 7%;
+    --sidebar-border: 215 20% 88%;
+    --sidebar-ring: 195 97% 40%;
   }
 
   .dark {
-    --background: 220 55% 7%;
-    --foreground: 210 40% 96%;
+    --background: 0 0% 100%;
+    --foreground: 220 55% 7%;
 
-    --card: 219 43% 11%;
-    --card-foreground: 210 40% 96%;
+    --card: 0 0% 100%;
+    --card-foreground: 220 55% 7%;
 
-    --popover: 219 43% 11%;
-    --popover-foreground: 210 40% 96%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 55% 7%;
 
-    --primary: 195 97% 50%;
-    --primary-foreground: 220 55% 7%;
+    --primary: 195 97% 40%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 216 80% 45%;
     --secondary-foreground: 0 0% 100%;
 
-    --muted: 218 32% 16%;
-    --muted-foreground: 215 20% 70%;
+    --muted: 210 20% 96%;
+    --muted-foreground: 215 15% 40%;
 
     --accent: 37 100% 59%;
     --accent-foreground: 220 55% 7%;
@@ -86,24 +85,29 @@
     --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 100%;
 
-    --border: 215 30% 22%;
-    --input: 215 30% 22%;
-    --ring: 195 97% 50%;
+    --border: 215 20% 88%;
+    --input: 215 20% 88%;
+    --ring: 195 97% 40%;
 
-    --sidebar-background: 220 55% 7%;
-    --sidebar-foreground: 210 40% 96%;
-    --sidebar-primary: 195 97% 50%;
-    --sidebar-primary-foreground: 220 55% 7%;
-    --sidebar-accent: 218 32% 16%;
-    --sidebar-accent-foreground: 210 40% 96%;
-    --sidebar-border: 215 30% 22%;
-    --sidebar-ring: 195 97% 50%;
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 220 55% 7%;
+    --sidebar-primary: 195 97% 40%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 210 20% 96%;
+    --sidebar-accent-foreground: 220 55% 7%;
+    --sidebar-border: 215 20% 88%;
+    --sidebar-ring: 195 97% 40%;
   }
-}
 
-@layer base {
   * {
     @apply border-border;
+  }
+
+  html,
+  body,
+  #root {
+    background-color: #ffffff;
+    color: #111827;
   }
 
   body {
@@ -111,7 +115,10 @@
     font-family: var(--font-body);
   }
 
-  h1, h2, h3, .font-display {
+  h1,
+  h2,
+  h3,
+  .font-display {
     font-family: var(--font-display);
   }
 
@@ -129,17 +136,19 @@
 
   .btn-velvet:hover {
     background: var(--gradient-velvet-hover);
-    box-shadow: 0 10px 30px -10px hsl(195 97% 50% / 0.4);
+    box-shadow: 0 10px 30px -10px hsl(195 97% 40% / 0.25);
   }
 
   .card-velvet {
     @apply rounded-xl overflow-hidden transition-all duration-300;
-    background: hsl(var(--card));
+    background: #ffffff;
+    color: #111827;
+    border: 1px solid #e5e7eb;
   }
 
   .card-velvet:hover {
     transform: translateY(-5px);
-    box-shadow: 0 20px 40px -15px hsl(195 97% 50% / 0.2);
+    box-shadow: 0 20px 40px -15px hsl(195 97% 40% / 0.15);
   }
 
   .gradient-text {
@@ -173,17 +182,33 @@
   }
 
   @keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   @keyframes slideUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 
   @keyframes slideLeft {
-    from { opacity: 0; transform: translateX(20px); }
-    to { opacity: 1; transform: translateX(0); }
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
   }
 }
