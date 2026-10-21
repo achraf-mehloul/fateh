@@ -5,6 +5,7 @@ import { toast } from 'sonner';
 interface CartContextType {
   items: CartItem[];
   addToCart: (product: Product, quantity?: number) => boolean;
+  buyNow: (product: Product, quantity?: number) => boolean;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
@@ -14,7 +15,6 @@ interface CartContextType {
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-// الحد الأقصى المتاح للمنتج (المخزون إن كان معروفاً)
 const availableStock = (product: Product): number =>
   typeof product.stock === 'number' ? product.stock : Infinity;
 
@@ -23,12 +23,10 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const addToCart = (product: Product, quantity = 1): boolean => {
     const stock = availableStock(product);
-
     if (stock <= 0) {
       toast.error('نفد المخزون', { description: product.name });
       return false;
     }
-
     const current = items.find((item) => item.product.id === product.id)?.quantity ?? 0;
     if (current + quantity > stock) {
       toast.error('الكمية المطلوبة غير متوفرة', {
@@ -36,7 +34,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       });
       return false;
     }
-
     setItems((prev) => {
       const existingItem = prev.find((item) => item.product.id === product.id);
       if (existingItem) {
@@ -48,6 +45,22 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       }
       return [...prev, { product, quantity }];
     });
+    return true;
+  };
+
+  const buyNow = (product: Product, quantity = 1): boolean => {
+    const stock = availableStock(product);
+    if (stock <= 0) {
+      toast.error('نفد المخزون', { description: product.name });
+      return false;
+    }
+    if (quantity > stock) {
+      toast.error('الكمية المطلوبة غير متوفرة', {
+        description: `المتوفر حالياً: ${stock} قطعة`,
+      });
+      return false;
+    }
+    setItems([{ product, quantity }]);
     return true;
   };
 
@@ -77,7 +90,6 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const clearCart = () => setItems([]);
 
-
   const totalItems = items.reduce((acc, item) => acc + item.quantity, 0);
   const totalPrice = items.reduce(
     (acc, item) => acc + item.product.price * item.quantity,
@@ -89,6 +101,7 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
       value={{
         items,
         addToCart,
+        buyNow,
         removeFromCart,
         updateQuantity,
         clearCart,
