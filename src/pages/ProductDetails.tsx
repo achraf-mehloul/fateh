@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { ArrowRight, Star, ShoppingCart, Minus, Plus, Check, Truck, Shield, RotateCcw } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, Star, ShoppingCart, Minus, Plus, Truck, Shield, RotateCcw, Zap } from 'lucide-react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -29,7 +29,8 @@ interface DBProduct {
 
 const ProductDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { addToCart } = useCart();
+  const navigate = useNavigate();
+  const { addToCart, buyNow } = useCart();
   const [product, setProduct] = useState<DBProduct | null>(null);
   const [loading, setLoading] = useState(true);
   const [categoryName, setCategoryName] = useState('');
@@ -40,7 +41,7 @@ const ProductDetails: React.FC = () => {
     const fetchProduct = async () => {
       if (!id) return;
       setLoading(true);
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('products')
         .select('*')
         .eq('id', id)
@@ -103,29 +104,29 @@ const ProductDetails: React.FC = () => {
   const displayName = product.name_ar || product.name;
   const displayDesc = product.description_ar || product.description || '';
   const images = (product.images && product.images.length > 0) ? product.images : (product.image_url ? [product.image_url] : []);
-
   const outOfStock = product.stock <= 0;
+
+  const buildCartProduct = () => ({
+    id: product.id,
+    name: displayName,
+    price: product.price,
+    image: product.image_url || '/placeholder.svg',
+    images: product.images || [],
+    category: categoryName,
+    description: displayDesc,
+    rating: product.rating || 0,
+    reviews_count: product.reviews_count || 0,
+    original_price: product.original_price,
+    is_deal: product.is_deal,
+    stock: product.stock,
+  });
 
   const handleAddToCart = () => {
     if (outOfStock) {
       toast.error('هذا المنتج غير متوفر حالياً');
       return;
     }
-    const cartProduct = {
-      id: product.id,
-      name: displayName,
-      price: product.price,
-      image: product.image_url || '/placeholder.svg',
-      images: product.images || [],
-      category: categoryName,
-      description: displayDesc,
-      rating: product.rating || 0,
-      reviews_count: product.reviews_count || 0,
-      original_price: product.original_price,
-      is_deal: product.is_deal,
-      stock: product.stock,
-    };
-    const added = addToCart(cartProduct, quantity);
+    const added = addToCart(buildCartProduct(), quantity);
     if (added) {
       toast.success('تمت الإضافة إلى السلة', {
         description: `${displayName} × ${quantity}`,
@@ -133,11 +134,19 @@ const ProductDetails: React.FC = () => {
     }
   };
 
+  const handleBuyNow = () => {
+    if (outOfStock) {
+      toast.error('هذا المنتج غير متوفر حالياً');
+      return;
+    }
+    const ok = buyNow(buildCartProduct(), quantity);
+    if (ok) navigate('/cart');
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header onSearch={() => {}} />
-      
+
       <main className="flex-1">
         <div className="container py-4">
           <nav className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -219,8 +228,15 @@ const ProductDetails: React.FC = () => {
                   <ShoppingCart className="w-5 h-5 ml-2" />
                   {outOfStock ? 'نفد المخزون' : 'أضف إلى السلة'}
                 </Button>
+                <Button
+                  onClick={handleBuyNow}
+                  disabled={outOfStock}
+                  className="flex-1 h-12 text-lg bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold"
+                >
+                  <Zap className="w-5 h-5 ml-2" />
+                  أطلب الأن
+                </Button>
               </div>
-
 
               <div className={`text-sm ${product.stock > 0 ? 'text-green-500' : 'text-red-500'}`}>
                 {product.stock > 0 ? `متوفر (${product.stock} في المخزون)` : 'غير متوفر حالياً'}
@@ -250,7 +266,7 @@ const ProductDetails: React.FC = () => {
           </div>
         </section>
       </main>
-      
+
       <Footer />
     </div>
   );
