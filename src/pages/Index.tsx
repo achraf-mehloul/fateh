@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -53,6 +52,9 @@ const mapDBProductToProduct = (dbProduct: DBProduct, categorySlug?: string) => (
   stock: dbProduct.stock,
 });
 
+const PRODUCTS_GRID_CLASS =
+  'grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-5 gap-4 md:gap-6';
+
 const Index: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categories, setCategories] = useState<DBCategory[]>([]);
@@ -66,42 +68,16 @@ const Index: React.FC = () => {
 
   const fetchData = async () => {
     setLoading(true);
-
     try {
       const [categoriesRes, productsRes, dealsRes] = await Promise.all([
-        supabase
-          .from('categories')
-          .select('*')
-          .eq('is_active', true)
-          .order('sort_order'),
-        supabase
-          .from('products')
-          .select('*')
-          .eq('is_active', true),
-        supabase
-          .from('deals_settings')
-          .select('*')
-          .limit(1)
-          .maybeSingle(),
+        supabase.from('categories').select('*').eq('is_active', true).order('sort_order'),
+        supabase.from('products').select('*').eq('is_active', true),
+        supabase.from('deals_settings').select('*').limit(1).maybeSingle(),
       ]);
 
-      if (categoriesRes.error) {
-        console.error('Error fetching categories:', categoriesRes.error);
-      } else {
-        setCategories(categoriesRes.data || []);
-      }
-
-      if (productsRes.error) {
-        console.error('Error fetching products:', productsRes.error);
-      } else {
-        setProducts(productsRes.data || []);
-      }
-
-      if (dealsRes.error) {
-        console.error('Error fetching deals settings:', dealsRes.error);
-      } else {
-        setDealsActive(dealsRes.data?.is_active ?? false);
-      }
+      if (!categoriesRes.error) setCategories(categoriesRes.data || []);
+      if (!productsRes.error) setProducts(productsRes.data || []);
+      if (!dealsRes.error) setDealsActive(dealsRes.data?.is_active ?? false);
     } catch (error) {
       console.error('Error fetching homepage data:', error);
     } finally {
@@ -111,23 +87,19 @@ const Index: React.FC = () => {
 
   const categoryMap = useMemo(() => {
     const map: Record<string, DBCategory> = {};
-
     categories.forEach((category) => {
       map[category.id] = category;
     });
-
     return map;
   }, [categories]);
 
   const filteredProducts = useMemo(() => {
     const query = searchQuery.trim().toLocaleLowerCase();
-
     if (!query) return null;
 
     return products.filter((product) => {
       const productName = product.name_ar || product.name;
-      const productDescription =
-        product.description_ar || product.description || '';
+      const productDescription = product.description_ar || product.description || '';
       const categoryName = product.category_id
         ? categoryMap[product.category_id]?.name_ar || ''
         : '';
@@ -147,8 +119,7 @@ const Index: React.FC = () => {
 
   const uncategorizedProducts = useMemo(() => {
     return products.filter(
-      (product) =>
-        !product.category_id || !categoryMap[product.category_id]
+      (product) => !product.category_id || !categoryMap[product.category_id]
     );
   }, [products, categoryMap]);
 
@@ -163,7 +134,7 @@ const Index: React.FC = () => {
         <main className="flex-1">
           <HeroSection />
           <div className="container py-8">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+            <div className={PRODUCTS_GRID_CLASS}>
               {[...Array(10)].map((_, index) => (
                 <div key={index} className="space-y-3">
                   <Skeleton className="h-48 w-full rounded-xl" />
@@ -189,10 +160,7 @@ const Index: React.FC = () => {
         {dealsActive && dealProducts.length > 0 && (
           <DealsSection
             products={dealProducts.map((product) =>
-              mapDBProductToProduct(
-                product,
-                categoryMap[product.category_id || '']?.slug
-              )
+              mapDBProductToProduct(product, categoryMap[product.category_id || '']?.slug)
             )}
           />
         )}
@@ -205,7 +173,7 @@ const Index: React.FC = () => {
               </h2>
 
               {filteredProducts.length > 0 ? (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                <div className={PRODUCTS_GRID_CLASS}>
                   {filteredProducts.map((product) => (
                     <ProductCard
                       key={product.id}
@@ -218,9 +186,7 @@ const Index: React.FC = () => {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <p className="text-muted-foreground">
-                    لم يتم العثور على منتجات
-                  </p>
+                  <p className="text-muted-foreground">لم يتم العثور على منتجات</p>
                 </div>
               )}
             </section>
@@ -228,11 +194,8 @@ const Index: React.FC = () => {
             <>
               {uncategorizedProducts.length > 0 && (
                 <section className="container py-8">
-                  <h2 className="font-display text-2xl mb-6 gradient-text">
-                    جميع المنتجات
-                  </h2>
-
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+                  <h2 className="font-display text-2xl mb-6 gradient-text">جميع المنتجات</h2>
+                  <div className={PRODUCTS_GRID_CLASS}>
                     {uncategorizedProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -245,7 +208,6 @@ const Index: React.FC = () => {
 
               {categories.map((category) => {
                 const categoryProducts = getProductsByCategory(category.id);
-
                 if (categoryProducts.length === 0) return null;
 
                 return (
@@ -254,8 +216,7 @@ const Index: React.FC = () => {
                     category={{
                       id: category.slug,
                       name: category.name_ar || category.name,
-                      image:
-                        categoryProducts[0]?.image_url || '/placeholder.svg',
+                      image: categoryProducts[0]?.image_url || '/placeholder.svg',
                     }}
                     products={categoryProducts.map((product) =>
                       mapDBProductToProduct(product, category.slug)
